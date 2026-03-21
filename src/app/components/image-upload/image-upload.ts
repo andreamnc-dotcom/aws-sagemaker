@@ -7,12 +7,14 @@ import { AwsService } from '../../services/aws.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './image-upload.html',
-  styleUrl: './image-upload.scss',
+  styleUrls: ['./image-upload.scss']
 })
 export class ImageUploadComponent implements OnInit, OnDestroy {
   uploading = false;
   uploadedKey = '';
-  notifications: any[] = [];
+  showModal = false;
+  showUploadToast = false;
+  currentResult: any = null;
   private pollInterval: any;
 
   constructor(private awsService: AwsService) {}
@@ -28,12 +30,12 @@ export class ImageUploadComponent implements OnInit, OnDestroy {
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-
     const file = input.files[0];
     this.uploading = true;
-
     try {
       this.uploadedKey = await this.awsService.uploadImage(file);
+      this.showUploadToast = true;
+      setTimeout(() => this.showUploadToast = false, 4000);
     } finally {
       this.uploading = false;
     }
@@ -42,7 +44,13 @@ export class ImageUploadComponent implements OnInit, OnDestroy {
   async poll() {
     const results = await this.awsService.pollResults();
     if (results.length > 0) {
-      this.notifications = [...results, ...this.notifications];
+      this.currentResult = results[0];
+      this.showModal = true;
     }
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.currentResult = null;
   }
 }

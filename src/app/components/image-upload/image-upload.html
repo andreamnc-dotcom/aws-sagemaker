@@ -1,34 +1,46 @@
 <div class="container">
-  <h1>Image Classifier</h1>
+  <div class="card">
+    <h1>AWS Sagemaker sample</h1>
+    <p class="subtitle">Sube una imagen y el modelo detectará qué hay en ella</p>
 
-  <div class="upload-section">
-    <input
-      type="file"
-      accept="image/*"
-      (change)="onFileSelected($event)"
-      [disabled]="uploading"
-    />
-    @if (uploading) {
-      <p>Subiendo imagen...</p>
-    }
-    @if (uploadedKey) {
-      <p>✅ Imagen subida: {{ uploadedKey }}</p>
-    }
+    <div class="upload-area">
+      <label class="upload-label" [class.disabled]="uploading">
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+          [disabled]="uploading"
+          hidden
+        />
+        @if (!uploading && !uploadedKey) {
+          <span class="upload-icon">📁</span>
+          <span>Selecciona una imagen</span>
+        }
+        @if (uploading) {
+          <span class="upload-icon">⏳</span>
+          <span>Subiendo imagen...</span>
+        }
+        @if (uploadedKey && !uploading) {
+          <span class="upload-icon">✅</span>
+          <span>Selecciona otra imagen</span>
+        }
+      </label>
+    </div>
   </div>
 
-  @if (notifications.length > 0) {
-    <div class="notifications">
-      <h2>Resultados</h2>
-      @for (n of notifications; track n.key) {
-        <div class="notification">
-          <p><strong>Imagen:</strong> {{ n.key }}</p>
-          <ul>
-            @for (p of n.predictions; track p.label) {
-              <li>{{ p.label }} — {{ p.confidence }}%</li>
-            }
-          </ul>
-        </div>
-      }
+  @if (showUploadToast) {
+    <div class="toast">
+      ✅ Imagen subida. Esperando notificación...
+    </div>
+  }
+
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>🎯 Resultado</h2>
+        <pre>{{ currentResult | json }}</pre>
+        <button (click)="closeModal()">Cerrar</button>
+      </div>
     </div>
   }
 </div>
