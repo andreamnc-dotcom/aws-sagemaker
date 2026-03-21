@@ -10,6 +10,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand } from '@aws-sdk/client-sqs';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
+process.env['ANGULAR_SSR_ALLOWED_HOSTS'] = '*';
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
@@ -99,9 +101,9 @@ app.use((req, res, next) => {
 });
 
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
-  const port = process.env['PORT'] || 4000;
+  const port = Number(process.env['PORT']) || 4000;
   initAws().then(() => {
-    app.listen(port, (error) => {
+    app.listen(port, '0.0.0.0', (error?: Error) => {
       if (error) throw error;
       console.log(`Node Express server listening on http://localhost:${port}`);
     });
