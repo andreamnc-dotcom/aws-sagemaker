@@ -12,7 +12,6 @@ import { AwsService } from '../../services/aws.service';
 })
 export class ImageUpload implements OnInit, OnDestroy {
   uploading = false;
-  uploadedKey = '';
   showModal = false;
   showUploadToast = false;
   currentResult: any = null;
@@ -29,6 +28,8 @@ export class ImageUpload implements OnInit, OnDestroy {
     this.pollInterval = setInterval(async () => {
       const results = await this.awsService.pollResults();
       if (results.length > 0) {
+        this.showModal = false;
+        this.cdr.detectChanges();
         this.currentResult = results[0];
         this.showModal = true;
         this.cdr.detectChanges();
@@ -47,9 +48,8 @@ export class ImageUpload implements OnInit, OnDestroy {
     this.uploading = true;
     this.cdr.detectChanges();
     try {
-      this.uploadedKey = await this.awsService.uploadImage(file);
+      await this.awsService.uploadImage(file);
       this.uploading = false;
-      this.uploadedKey = '';
       this.showUploadToast = true;
       this.cdr.detectChanges();
       setTimeout(() => {

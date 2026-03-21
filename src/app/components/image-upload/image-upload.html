@@ -12,17 +12,13 @@
           [disabled]="uploading"
           hidden
         />
-        @if (!uploading && !uploadedKey) {
+        @if (!uploading) {
           <span class="upload-icon">📁</span>
           <span>Selecciona una imagen</span>
         }
         @if (uploading) {
           <span class="upload-icon">⏳</span>
           <span>Subiendo imagen...</span>
-        }
-        @if (uploadedKey && !uploading) {
-          <span class="upload-icon">✅</span>
-          <span>Selecciona otra imagen</span>
         }
       </label>
     </div>
