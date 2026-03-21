@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AwsService } from '../../services/aws.service';
 
@@ -18,9 +19,13 @@ export class ImageUpload implements OnInit, OnDestroy {
   currentResult: any = null;
   private pollInterval: any;
 
-  constructor(private awsService: AwsService) {}
+  constructor(
+    private awsService: AwsService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
     this.pollInterval = setInterval(async () => {
       const results = await this.awsService.pollResults();
       if (results.length > 0) {
