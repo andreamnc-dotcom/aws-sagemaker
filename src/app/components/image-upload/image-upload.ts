@@ -10,7 +10,7 @@ import { AwsService } from '../../services/aws.service';
   styleUrls: ['./image-upload.scss'],
   host: { ngSkipHydration: 'true' }
 })
-export class ImageUploadComponent implements OnInit, OnDestroy {
+export class ImageUpload implements OnInit, OnDestroy {
   uploading = false;
   uploadedKey = '';
   showModal = false;
