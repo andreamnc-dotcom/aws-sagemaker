@@ -8,8 +8,7 @@ import { AwsService } from '../../services/aws.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './image-upload.html',
-  styleUrls: ['./image-upload.scss'],
-  host: { ngSkipHydration: 'true' }
+  styleUrls: ['./image-upload.scss']
 })
 export class ImageUpload implements OnInit, OnDestroy {
   uploading = false;
