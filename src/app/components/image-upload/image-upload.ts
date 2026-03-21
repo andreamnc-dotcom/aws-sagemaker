@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AwsService } from '../../services/aws.service';
@@ -20,6 +20,7 @@ export class ImageUpload implements OnInit, OnDestroy {
 
   constructor(
     private awsService: AwsService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -30,6 +31,7 @@ export class ImageUpload implements OnInit, OnDestroy {
       if (results.length > 0) {
         this.currentResult = results[0];
         this.showModal = true;
+        this.cdr.detectChanges();
       }
     }, 3000);
   }
@@ -43,15 +45,26 @@ export class ImageUpload implements OnInit, OnDestroy {
     if (!input.files?.length) return;
     const file = input.files[0];
     this.uploading = true;
-    this.uploadedKey = await this.awsService.uploadImage(file);
-    this.uploading = false;
-    this.uploadedKey = '';
-    this.showUploadToast = true;
-    setTimeout(() => this.showUploadToast = false, 4000);
+    this.cdr.detectChanges();
+    try {
+      this.uploadedKey = await this.awsService.uploadImage(file);
+      this.uploading = false;
+      this.uploadedKey = '';
+      this.showUploadToast = true;
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.showUploadToast = false;
+        this.cdr.detectChanges();
+      }, 4000);
+    } catch (e) {
+      this.uploading = false;
+      this.cdr.detectChanges();
+    }
   }
 
   closeModal() {
     this.showModal = false;
     this.currentResult = null;
+    this.cdr.detectChanges();
   }
 }
