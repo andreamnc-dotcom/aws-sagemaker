@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AwsService } from '../../services/aws.service';
 
@@ -7,7 +7,8 @@ import { AwsService } from '../../services/aws.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './image-upload.html',
-  styleUrls: ['./image-upload.scss']
+  styleUrls: ['./image-upload.scss'],
+  host: { ngSkipHydration: 'true' }
 })
 export class ImageUploadComponent implements OnInit, OnDestroy {
   uploading = false;
@@ -17,10 +18,16 @@ export class ImageUploadComponent implements OnInit, OnDestroy {
   currentResult: any = null;
   private pollInterval: any;
 
-  constructor(private awsService: AwsService, private zone: NgZone) {}
+  constructor(private awsService: AwsService) {}
 
   ngOnInit() {
-    this.pollInterval = setInterval(() => this.poll(), 3000);
+    this.pollInterval = setInterval(async () => {
+      const results = await this.awsService.pollResults();
+      if (results.length > 0) {
+        this.currentResult = results[0];
+        this.showModal = true;
+      }
+    }, 3000);
   }
 
   ngOnDestroy() {
@@ -31,30 +38,12 @@ export class ImageUploadComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
-    this.zone.run(() => this.uploading = true);
-    try {
-      this.uploadedKey = await this.awsService.uploadImage(file);
-      this.zone.run(() => {
-        this.uploading = false;
-        this.showUploadToast = true;
-        this.uploadedKey = '';
-        setTimeout(() => {
-          this.zone.run(() => this.showUploadToast = false);
-        }, 4000);
-      });
-    } catch (e) {
-      this.zone.run(() => this.uploading = false);
-    }
-  }
-
-  async poll() {
-    const results = await this.awsService.pollResults();
-    if (results.length > 0) {
-      this.zone.run(() => {
-        this.currentResult = results[0];
-        this.showModal = true;
-      });
-    }
+    this.uploading = true;
+    this.uploadedKey = await this.awsService.uploadImage(file);
+    this.uploading = false;
+    this.uploadedKey = '';
+    this.showUploadToast = true;
+    setTimeout(() => this.showUploadToast = false, 4000);
   }
 
   closeModal() {
